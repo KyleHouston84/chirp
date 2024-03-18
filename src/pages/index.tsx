@@ -25,7 +25,7 @@ const CreatePostWizard = () => {
     onError: e => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
       if (errorMessage) {
-        toast.error(errorMessage[0] || 'No message found');
+        toast.error(errorMessage[0] ?? 'No message found');
       } else {
         toast.error('Too many attempts, try again later');
       }
