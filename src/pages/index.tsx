@@ -24,9 +24,8 @@ const CreatePostWizard = () => {
     },
     onError: e => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
-      // @ts-ignore bypassing prefer-optional-chain rule for now
-      if (errorMessage && errorMessage[0]) {
-        toast.error(errorMessage[0]);
+      if (errorMessage) {
+        toast.error(errorMessage[0] || 'No message found');
       } else {
         toast.error('Too many attempts, try again later');
       }
