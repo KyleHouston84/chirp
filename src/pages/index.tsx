@@ -20,10 +20,11 @@ const CreatePostWizard = () => {
   const { mutate, isLoading: isPosting } = api.post.create.useMutation({
     onSuccess: () => {
       setInput('');
-      ctx.post.getAll.invalidate();
+      void ctx.post.getAll.invalidate();
     },
     onError: e => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
+      // @ts-ignore bypassing prefer-optional-chain rule for now
       if (errorMessage && errorMessage[0]) {
         toast.error(errorMessage[0]);
       } else {
