@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
+import { SignInButton, useUser } from '@clerk/nextjs';
 import Image from 'next/image';
-import Head from 'next/head';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
-import { RouterOutputs, api } from '~/utils/api';
+import { type RouterOutputs, api } from '~/utils/api';
 import { LoadingPage } from '~/components/loading';
 import toast from 'react-hot-toast';
 import Link from 'next/link';

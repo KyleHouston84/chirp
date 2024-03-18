@@ -1,4 +1,4 @@
-import { GetStaticProps, type NextPage } from 'next';
+import type { GetStaticProps, NextPage } from 'next';
 import Head from 'next/head';
 import { api } from '~/utils/api';
 
@@ -40,7 +40,7 @@ export const getStaticProps: GetStaticProps = async context => {
 
   const username = slug.replace('@', '');
 
-  helpers.profile.getUserByUsername.prefetch({ username: slug });
+  await helpers.profile.getUserByUsername.prefetch({ username: slug });
 
   return {
     props: {
