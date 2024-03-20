@@ -2,6 +2,7 @@ import { clerkClient } from '@clerk/nextjs';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { filterUserForClient } from '~/server/helpers/filterUserForClient';
+import type { Post } from '@prisma/client';
 
 import { Ratelimit } from '@upstash/ratelimit'; // for deno: see above
 import { Redis } from '@upstash/redis'; // see below for cloudflare and fastly adapters
@@ -11,6 +12,35 @@ import {
   privateProcedure,
   publicProcedure,
 } from '~/server/api/trpc';
+
+const addUserDataToPosts = async (posts: Post[]) => {
+  const users = (
+    await clerkClient.users.getUserList({
+      userId: posts.map(post => post.authorId),
+      limit: 100,
+    })
+  ).map(filterUserForClient);
+
+  return posts.map(post => {
+    {
+      const author = users.find(user => user.id === post.authorId);
+
+      if (!author) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Author for post not found',
+        });
+      }
+
+      return {
+        post,
+        author,
+        ...author,
+        username: author.username,
+      };
+    }
+  });
+};
 
 // Create a new ratelimiter, that allows 3 requests per 1 minute
 const ratelimit = new Ratelimit({
@@ -39,24 +69,20 @@ export const postRouter = createTRPCRouter({
       })
     ).map(filterUserForClient);
 
-    return posts.map(post => {
-      {
-        const author = users.find(user => user.id === post.authorId);
-
-        if (!author) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Author for post not found',
-          });
-        }
-
-        return {
-          post,
-          author,
-        };
-      }
-    });
+    return addUserDataToPosts(posts);
   }),
+
+  getPostsByUserId: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) =>
+      ctx.db.post
+        .findMany({
+          where: { authorId: input.userId },
+          take: 100,
+          orderBy: [{ createdAt: 'desc' }],
+        })
+        .then(addUserDataToPosts),
+    ),
 
   create: privateProcedure
     .input(
