@@ -10,6 +10,7 @@ on:
 
 env:
   DATABASE_URL: 'https://fake.com'
+  UPSTASH_REDIS_REST_URL: 'https://fake123.com'
 
 jobs:
   build:
@@ -20,7 +21,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up environment variables
-        run: echo "ENV_VARIABLE_NAME=$UPSTASH_REDIS_REST_URL" >> $GITHUB_ENV
+        run: echo "ENV_VARIABLE_NAME=$ENV_VARIABLE_NAME" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: npm install
