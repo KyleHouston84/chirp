@@ -11,6 +11,7 @@ on:
 env:
   DATABASE_URL: 'https://fake.com'
   UPSTASH_REDIS_REST_URL: 'https://fake123.com'
+  UPSTASH_REDIS_REST_TOKEN: '12345'
 
 jobs:
   build:
