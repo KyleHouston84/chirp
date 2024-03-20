@@ -2,6 +2,11 @@ import type { GetStaticProps, NextPage } from 'next';
 import Head from 'next/head';
 import { api } from '~/utils/api';
 
+import { PageLayout } from '~/components/layout';
+import { LoadingPage } from '~/components/loading';
+import { PostView } from '~/components/postView';
+import { generateServerSideHelper } from '~/server/helpers/serverSideHelper';
+
 const ProfileFeed = (props: { userId: string }) => {
   const { data, isLoading } = api.post.getPostsByUserId.useQuery({
     userId: props.userId,
@@ -25,7 +30,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
     username,
   });
 
-  if (!data) return <div>404</div>;
+  if (!data) return <div></div>;
 
   return (
     <>
@@ -51,20 +56,8 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   );
 };
 
-import { createServerSideHelpers } from '@trpc/react-query/server';
-import { appRouter } from '~/server/api/root';
-import { db } from '~/server/db';
-import superjson from 'superjson';
-import { PageLayout } from '~/components/layout';
-import { LoadingPage } from '~/components/loading';
-import { PostView } from '~/components/postView';
-
 export const getStaticProps: GetStaticProps = async context => {
-  const helpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: { db, userId: null },
-    transformer: superjson,
-  });
+  const helpers = generateServerSideHelper();
 
   const slug = context.params?.slug;
 
