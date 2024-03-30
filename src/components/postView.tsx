@@ -7,10 +7,10 @@ import Link from 'next/link';
 
 dayjs.extend(relativeTime);
 
-type PostWithUser = RouterOutputs['post']['getAll'][number];
+type PostWithUser = RouterOutputs['post']['getRepliesById'][number];
 export const PostView = (props: PostWithUser) => {
   const { post, author } = props;
-  console.log('post', post);
+
   return (
     <div className='flex gap-3 border-b border-slate-400 p-4' key={post.id}>
       <Image

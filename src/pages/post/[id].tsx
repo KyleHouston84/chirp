@@ -5,22 +5,34 @@ import { PageLayout } from '~/components/layout';
 import { LoadingPage } from '~/components/loading';
 import { PostView } from '~/components/postView';
 import { generateServerSideHelper } from '~/server/helpers/serverSideHelper';
+import { CreatePostWizard } from '~/components/createPostWizard';
 
 const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
-  const { data } = api.post.getById.useQuery({
+  const { data: postData, isLoading: postLoading } = api.post.getById.useQuery({
     id,
   });
+  const { data: replyData, isLoading: repliesLoading } =
+    api.post.getRepliesById.useQuery({
+      id,
+    });
 
-  if (!data) return <div></div>;
+  if (!postData) return <div></div>;
+  if (postLoading) return <LoadingPage />;
 
   return (
     <>
       <Head>
-        <title>{`${data.post.content} - @${data.author.username}`}</title>
+        <title>{`${postData.post.content} - @${postData.author.username}`}</title>
       </Head>
       <PageLayout>
         <div className='SinglePostView'>
-          <PostView {...data} />
+          <PostView {...postData} />
+          <CreatePostWizard postId={id} />
+          {repliesLoading ? (
+            <LoadingPage />
+          ) : (
+            replyData?.map(reply => <PostView {...reply} key={reply.post.id} />)
+          )}
         </div>
       </PageLayout>
     </>

@@ -12,6 +12,7 @@ import {
   privateProcedure,
   publicProcedure,
 } from '~/server/api/trpc';
+import { as } from 'node_modules/@upstash/redis/zmscore-5d82e632';
 
 const addUserDataToPosts = async (posts: Post[]) => {
   const users = (
@@ -67,10 +68,11 @@ export const postRouter = createTRPCRouter({
       return (await addUserDataToPosts([post]))[0];
     }),
 
-  getAll: publicProcedure.query(async ({ ctx }) => {
+  getAllOriginalPosts: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.db.post.findMany({
       take: 100,
       orderBy: [{ createdAt: 'desc' }],
+      where: { replyToId: '' },
     });
 
     const users = (
@@ -82,6 +84,25 @@ export const postRouter = createTRPCRouter({
 
     return addUserDataToPosts(posts);
   }),
+
+  getRepliesById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.db.post.findMany({
+        take: 100,
+        orderBy: [{ createdAt: 'desc' }],
+        where: { replyToId: input.id },
+      });
+
+      const users = (
+        await clerkClient.users.getUserList({
+          userId: posts.map(post => post.authorId),
+          limit: 100,
+        })
+      ).map(filterUserForClient);
+
+      return addUserDataToPosts(posts);
+    }),
 
   getPostsByUserId: publicProcedure
     .input(z.object({ userId: z.string() }))
@@ -95,10 +116,22 @@ export const postRouter = createTRPCRouter({
         .then(addUserDataToPosts),
     ),
 
+  incrementPostReplyCount: privateProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const post = await ctx.db.post.update({
+        where: { id: input.id },
+        data: { replyCount: { increment: 1 } },
+      });
+
+      return post;
+    }),
+
   create: privateProcedure
     .input(
       z.object({
         content: z.string().emoji('Only emojis are allowed!').min(1).max(280),
+        replyToId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -112,6 +145,7 @@ export const postRouter = createTRPCRouter({
           authorId,
           content: input.content,
           replyCount: 0,
+          replyToId: input.replyToId ?? '',
         },
       });
 
