@@ -10,15 +10,15 @@ on:
 
 env:
   DATABASE_URL: 'https://fake.com'
-  # UPSTASH_REDIS_REST_URL: 'https://fake123.com'
-  # UPSTASH_REDIS_REST_TOKEN: '12345'
-  # CLERK_SECRET_KEY: 'thishastoworknow'
-  # NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'asdklfajlsdf'
+  UPSTASH_REDIS_REST_URL: 'https://fake123.com'
+  UPSTASH_REDIS_REST_TOKEN: '12345'
+  CLERK_SECRET_KEY: 'thishastoworknow'
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'asdklfajlsdf'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v2

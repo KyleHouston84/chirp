@@ -111,6 +111,7 @@ export const postRouter = createTRPCRouter({
         data: {
           authorId,
           content: input.content,
+          replyCount: 0,
         },
       });
 
