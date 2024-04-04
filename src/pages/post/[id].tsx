@@ -25,8 +25,10 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
         <title>{`${postData.post.content} - @${postData.author.username}`}</title>
       </Head>
       <PageLayout>
-        <div className='SinglePostView'>
-          <PostView {...postData} />
+        <div>
+          <div className='SinglePostView'>
+            <PostView {...postData} />
+          </div>
           <CreatePostWizard postId={id} />
           {repliesLoading ? (
             <LoadingPage />
